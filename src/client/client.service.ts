@@ -33,6 +33,10 @@ export class ClientService {
     return this.clientsRepository.findByPk<Client>(id);
   }
 
+  async findWithEmail(email: string): Promise<Client> {
+    return this.clientsRepository.findOne<Client>({ where: { email } });
+  }
+
   async update(id: number, attrs: Partial<Client>): Promise<Partial<Client>> {
     const user = await this.findOne(id);
     if (!user) {

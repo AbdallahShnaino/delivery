@@ -8,15 +8,18 @@ import { DatabaseModule } from './database/database.module';
 import { CurrentUserMiddleware } from './middleware/current-user.middleware';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './interceptors/logging.interceptor';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
+    AuthModule,
     DatabaseModule,
     ClientModule,
     OrderModule,
     ManagerModule,
     DelivererModule,
     SharedModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [

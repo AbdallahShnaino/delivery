@@ -33,6 +33,10 @@ export class DelivererService {
     return this.delivererRepository.findByPk<Deliverer>(id);
   }
 
+  async findWithEmail(email: string): Promise<Deliverer> {
+    return this.delivererRepository.findOne<Deliverer>({ where: { email } });
+  }
+
   async update(
     id: number,
     attrs: Partial<Deliverer>,

@@ -33,6 +33,10 @@ export class ManagerService {
     return this.managerRepository.findByPk<Manager>(id);
   }
 
+  async findWithEmail(email: string): Promise<Manager> {
+    return this.managerRepository.findOne<Manager>({ where: { email } });
+  }
+
   async update(id: number, attrs: Partial<Manager>): Promise<Partial<Manager>> {
     const user = await this.findOne(id);
     if (!user) {
