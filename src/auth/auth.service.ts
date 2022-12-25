@@ -24,14 +24,14 @@ export class AuthService {
     let user: Client | Manager | Deliverer = null;
     if (type === 'client') {
       user = await this.clientService.findWithEmail(email);
-    }
-
-    if (type === 'deliverer') {
+    } else if (type === 'deliverer') {
       user = await this.delivererService.findWithEmail(email);
-    }
-
-    if (type === 'manager') {
+    } else if (type === 'manager') {
       user = await this.managerService.findWithEmail(email);
+    } else {
+      if (user) {
+        throwCustomException(Message.UserNotFound, HttpStatus.BAD_REQUEST);
+      }
     }
 
     if (user) {
@@ -40,6 +40,7 @@ export class AuthService {
 
     const hashedPassword = await this.passwordService.toHash(password);
     createUserDto.password = hashedPassword;
+
     if (type === 'client') {
       user = await this.clientService.create(createUserDto);
     }
@@ -52,6 +53,7 @@ export class AuthService {
       user = await this.managerService.create(createUserDto);
     }
 
+    delete user.dataValues['password'];
     return user;
   }
 
@@ -78,6 +80,7 @@ export class AuthService {
     if (!res) {
       throwCustomException(Message.BadPassword, HttpStatus.BAD_REQUEST);
     }
+    delete user.dataValues['password'];
     return user;
   }
 }

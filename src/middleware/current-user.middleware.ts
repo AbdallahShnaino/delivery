@@ -8,7 +8,6 @@ import { Manager } from 'src/manager/entities/manager.entity';
 import { ManagerService } from 'src/manager/manager.service';
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       currentUser?: Client | Manager | Deliverer;

@@ -1,4 +1,5 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
+import { WsException } from '@nestjs/websockets';
 
 export enum Message {
   IdCouldNotBeNull = 'id could not be null be sure to provide it!',
@@ -10,5 +11,5 @@ export enum Message {
   BadPassword = 'bad password',
 }
 export function throwCustomException(message: Message, resCode: HttpStatus) {
-  throw new HttpException(message, resCode);
+  throw new WsException(message);
 }

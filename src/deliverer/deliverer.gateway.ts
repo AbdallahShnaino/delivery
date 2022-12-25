@@ -4,17 +4,11 @@ import {
   MessageBody,
 } from '@nestjs/websockets';
 import { DelivererService } from './deliverer.service';
-import { CreateDelivererDto } from './dto/create-deliverer.dto';
 import { UpdateDelivererDto } from './dto/update-deliverer.dto';
 
 @WebSocketGateway()
 export class DelivererGateway {
   constructor(private readonly delivererService: DelivererService) {}
-
-  @SubscribeMessage('createDeliverer')
-  async create(@MessageBody() createDelivererDto: CreateDelivererDto) {
-    return await this.delivererService.create(createDelivererDto);
-  }
 
   @SubscribeMessage('findAllDeliverer')
   async findAll() {

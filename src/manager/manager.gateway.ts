@@ -4,17 +4,11 @@ import {
   MessageBody,
 } from '@nestjs/websockets';
 import { ManagerService } from './manager.service';
-import { CreateManagerDto } from './dto/create-manager.dto';
 import { UpdateManagerDto } from './dto/update-manager.dto';
 
 @WebSocketGateway()
 export class ManagerGateway {
   constructor(private readonly managerService: ManagerService) {}
-
-  @SubscribeMessage('createManager')
-  create(@MessageBody() createManagerDto: CreateManagerDto) {
-    return this.managerService.create(createManagerDto);
-  }
 
   @SubscribeMessage('findAllManager')
   findAll() {
