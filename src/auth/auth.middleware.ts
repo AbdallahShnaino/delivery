@@ -22,36 +22,39 @@ export const WSAuthMiddleware = (
   managerService: ManagerService,
 ): SocketMiddleware => {
   return async (socket: AuthSocket, next) => {
+    const logger = new Logger();
     try {
-      const logger = new Logger();
       const token =
         socket.handshake.auth.token || socket.handshake.headers['token'];
-
       const jwtPayload = jwtService.verify(token);
       logger.debug(`Validating auth token before connection: ${token}`);
       let userResult: Client | Manager | Deliverer = null;
       if (jwtPayload.type === 'client') {
         userResult = await clientService.findOne(jwtPayload.userId);
-      }
-
-      if (jwtPayload.type === 'deliverer') {
+      } else if (jwtPayload.type === 'deliverer') {
         userResult = await delivererService.findOne(jwtPayload.userId);
-      }
-
-      if (jwtPayload.type === 'manager') {
+      } else if (jwtPayload.type === 'manager') {
         userResult = await managerService.findOne(jwtPayload.userId);
+      } else {
+        logger.debug(`Invalid role`);
+        next({
+          name: 'InValid',
+          message: 'InValid Role',
+        });
       }
 
       if (userResult) {
         socket.user = userResult;
         next();
       } else {
+        logger.debug(`Invalid role`);
         next({
-          name: 'Unauthorizaed',
-          message: 'Unauthorizaed',
+          name: 'Invalid role',
+          message: 'Invalid role',
         });
       }
     } catch (error) {
+      logger.debug(`Unauthorizaed`);
       next({
         name: 'Unauthorizaed',
         message: 'Unauthorizaed',

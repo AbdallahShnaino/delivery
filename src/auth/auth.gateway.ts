@@ -16,8 +16,9 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
+  ConnectedSocket,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { Client } from 'src/client/entities/client.entity';
 import { CurrentUser } from 'src/decorators/current-user-decorator';
 import { Deliverer } from 'src/deliverer/entities/deliverer.entity';
@@ -58,6 +59,7 @@ export class AuthGateway
   server: Server;
 
   afterInit(server: Server) {
+    /*
     const middle = WSAuthMiddleware(
       this.jwtService,
       this.clientService,
@@ -65,6 +67,7 @@ export class AuthGateway
       this.managerService,
     );
     server.use(middle);
+    */
     this.logger.log('Auth Gateway Initialized ');
   }
 
@@ -81,7 +84,6 @@ export class AuthGateway
   async signup(@MessageBody() createUserDto: CreateUserDto) {
     const user = await this.authService.signup(createUserDto);
     const payload = { userId: user.id, type: createUserDto.type };
-
     this.server.emit('onUserCreated', {
       message: user,
       time: new Date().toDateString(),
@@ -90,10 +92,13 @@ export class AuthGateway
   }
 
   @SubscribeMessage('signin')
-  async signin(@MessageBody() signInUserDto: SignInUserDto) {
+  async signin(
+    @MessageBody() signInUserDto: SignInUserDto,
+    @ConnectedSocket() client: Socket,
+  ) {
     const user = await this.authService.signin(signInUserDto);
     const payload = { userId: user.id, type: signInUserDto.type };
-
+    client.handshake.headers['token'] = this.jwtService.sign(payload);
     this.server.emit('onSignedIn', {
       user,
       access_token: this.jwtService.sign(payload),
