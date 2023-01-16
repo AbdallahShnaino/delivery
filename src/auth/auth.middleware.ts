@@ -25,7 +25,37 @@ export const WSAuthMiddleware = (
     const logger = new Logger();
     try {
       const token =
-        socket.handshake.auth.token || socket.handshake.headers['token'];
+        socket.handshake.auth.token || socket.handshake.headers.authorization;
+      logger.debug(`Validating auth token before connection: ${token}`);
+      const jwtPayload = jwtService.verify(token);
+
+      const { userId } = jwtService.verify(token);
+
+      logger.debug(`jwtPayload : ${jwtPayload}`);
+      logger.debug(`userId :   ${userId}`);
+
+      let userResult: Client | Manager | Deliverer = null;
+      if (jwtPayload.type === 'client') {
+        userResult = await clientService.findOne(jwtPayload.userId);
+      } else if (jwtPayload.type === 'deliverer') {
+        userResult = await delivererService.findOne(jwtPayload.userId);
+      } else if (jwtPayload.type === 'manager') {
+        userResult = await managerService.findOne(jwtPayload.userId);
+      } else {
+        /* 
+
+        logger.debug(`Invalid role`);
+        next({
+          name: 'InValid',
+          message: 'InValid Role',
+        });
+
+*/
+      }
+
+      /* 
+
+
       const jwtPayload = jwtService.verify(token);
       logger.debug(`Validating auth token before connection: ${token}`);
       let userResult: Client | Manager | Deliverer = null;
@@ -43,22 +73,31 @@ export const WSAuthMiddleware = (
         });
       }
 
-      if (userResult) {
-        socket.user = userResult;
-        next();
-      } else {
-        logger.debug(`Invalid role`);
-        next({
-          name: 'Invalid role',
-          message: 'Invalid role',
-        });
-      }
+
+      
+            if (userResult) {
+              socket.user = userResult;
+              next();
+            } else {
+              logger.debug(`Invalid role`);
+              next({
+                name: 'Invalid role',
+                message: 'Invalid role',
+              });
+            }
+
+
+*/
     } catch (error) {
       logger.debug(`Unauthorizaed`);
+      next();
+      /* 
+
       next({
         name: 'Unauthorizaed',
         message: 'Unauthorizaed',
       });
+*/
     }
   };
 };

@@ -59,7 +59,6 @@ export class AuthGateway
   server: Server;
 
   afterInit(server: Server) {
-    /*
     const middle = WSAuthMiddleware(
       this.jwtService,
       this.clientService,
@@ -67,7 +66,7 @@ export class AuthGateway
       this.managerService,
     );
     server.use(middle);
-    */
+
     this.logger.log('Auth Gateway Initialized ');
   }
 
@@ -80,7 +79,6 @@ export class AuthGateway
   }
 
   @SubscribeMessage('signup')
-  // @UseInterceptors(ClassSerializerInterceptor)
   async signup(@MessageBody() createUserDto: CreateUserDto) {
     const user = await this.authService.signup(createUserDto);
     const payload = { userId: user.id, type: createUserDto.type };
@@ -98,23 +96,29 @@ export class AuthGateway
   ) {
     const user = await this.authService.signin(signInUserDto);
     const payload = { userId: user.id, type: signInUserDto.type };
-    client.handshake.headers['token'] = this.jwtService.sign(payload);
+    client.handshake.headers.authorization = this.jwtService.sign(payload);
+
+    this.logger.log(`authorization ${client.handshake.headers.authorization}`);
+
     this.server.emit('onSignedIn', {
       user,
-      access_token: this.jwtService.sign(payload),
     });
   }
 
   @SubscribeMessage('whoami')
-  // @UseGuards(AuthGard)
   whoami(@CurrentUser() user: Client | Manager | Deliverer) {
-    return user;
+    this.server.emit('onRoleClarification', 'user');
   }
 
+  /* 
   @SubscribeMessage('whoami')
   //  @UseGuards(AuthGard)
   signOut(@Session() session: Record<string, any>) {
     session.userId = null;
     session.type = null;
   }
+
+
+
+*/
 }
